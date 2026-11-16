@@ -29,22 +29,23 @@ push_image:
     - docker logout "$CI_REGISTRY"
   rules:
     - if: '$CI_COMMIT_BRANCH'
+
+
+
 update_gitops:
   stage: push
-  needs:
-    - push_image
-
+  before_script:
+    - sudo apt-get update
+    - sudo apt-get install -y git
   script:
     - git clone "http://${GITOPS_USER}:${GITOPS_TOKEN}@gitlab.home.arpa/devops-assignment/devops-app-gitops.git"
     - cd devops-app-gitops
-    - sed -i "s|image: REPLACE_IMAGE|image: ${CI_REGISTRY_IMAGE}:${IMAGE_TAG}|" base/deployment.yaml
+    - sed -i "s|REPLACE_IMAGE|${CI_REGISTRY_IMAGE}:${IMAGE_TAG}|" base/deployment.yaml
     - git config user.name "GitLab CI"
     - git config user.email "gitlab-ci@example.local"
     - git add base/deployment.yaml
-    - git diff --cached --quiet || git commit -m "Update image to ${IMAGE_TAG}"
+    - git commit -m "Update image to ${IMAGE_TAG}"
     - git push origin main
-
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
-
 
