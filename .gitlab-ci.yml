@@ -2,6 +2,7 @@ stages:
   - test
   - build
   - push
+  - update_gitops
 
 variables:
   IMAGE_TAG: "$CI_COMMIT_SHA"
@@ -30,23 +31,16 @@ push_image:
   rules:
     - if: '$CI_COMMIT_BRANCH'
 
-
-
 update_gitops:
-  stage: push
-#  before_script:
-#    - sudo apt-get update
-#   - sudo apt-get install -y git
+  stage: update_gitops
   script:
     - git clone "http://${GITOPS_USER}:${GITOPS_TOKEN}@gitlab.home.arpa/devops-assignment/devops-app-gitops.git"
     - cd devops-app-gitops
-    - sed -i "s|REPLACE_IMAGE|${CI_REGISTRY_IMAGE}:${IMAGE_TAG}|" base/deployment.yaml
+    - sed -i -E "s|^([[:space:]]*image: ).*|\\1${CI_REGISTRY_IMAGE}:${IMAGE_TAG}|" base/deployment.yaml
     - git config user.name "GitLab CI"
     - git config user.email "gitlab-ci@example.local"
     - git add base/deployment.yaml
     - git commit -m "Update image to ${IMAGE_TAG}"
     - git push origin main
-#  rules:
-#    - if: '$CI_COMMIT_BRANCH == "main"i'
-
-
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
