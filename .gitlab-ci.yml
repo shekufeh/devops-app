@@ -47,5 +47,5 @@ update_gitops:
     - git commit -m "Update image to ${IMAGE_TAG}"
     - git push origin main
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"o'
+    - if: '$CI_COMMIT_BRANCH == "main"'
 
