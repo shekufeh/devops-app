@@ -36,7 +36,7 @@ update_gitops:
   script:
     - git clone "http://${GITOPS_USER}:${GITOPS_TOKEN}@gitlab.home.arpa/devops-assignment/devops-app-gitops.git"
     - cd devops-app-gitops
-    - sed -i -E "s|^([[:space:]]*image: ).*|\\1${CI_REGISTRY_IMAGE}:${IMAGE_TAG}|" base/deployment.yaml
+    - sed -i "/^[[:space:]]*image:/c\          image: ${CI_REGISTRY_IMAGE}:${IMAGE_TAG}" base/deployment.yaml
     - git config user.name "GitLab CI"
     - git config user.email "gitlab-ci@example.local"
     - git add base/deployment.yaml
@@ -44,3 +44,4 @@ update_gitops:
     - git push origin main
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
+
