@@ -36,11 +36,19 @@ update_gitops:
   script:
     - git clone "http://${GITOPS_USER}:${GITOPS_TOKEN}@gitlab.home.arpa/devops-assignment/devops-app-gitops.git"
     - cd devops-app-gitops
+    - echo "Expected image: ${CI_REGISTRY_IMAGE}:${IMAGE_TAG}"
+    - grep -n 'image:' base/deployment.yaml
     - sed -i "s|^[[:space:]]*image:.*|          image: ${CI_REGISTRY_IMAGE}:${IMAGE_TAG}|" base/deployment.yaml
+    - git diff -- base/deployment.yaml
     - git config user.name "GitLab CI"
     - git config user.email "gitlab-ci@example.local"
     - git add base/deployment.yaml
-    - git commit -m "Update image to ${IMAGE_TAG}"
-    - git push origin main
+    - |
+      if ! git diff --cached --quiet; then
+        git commit -m "Update image to ${IMAGE_TAG}"
+        git push origin main
+      else
+        echo "Image is already up to date. Nothing to commit."
+      fi
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
