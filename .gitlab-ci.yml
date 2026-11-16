@@ -49,3 +49,4 @@ update_gitops:
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
 
+
