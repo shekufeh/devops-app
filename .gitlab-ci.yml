@@ -31,20 +31,25 @@ push_image:
   rules:
     - if: '$CI_COMMIT_BRANCH'
 
+
 update_gitops:
   stage: push
   image: alpine:3.21
+
   before_script:
     - apk add --no-cache git
+
   script:
-    - git clone http://${GITOPS_USER}:${GITOPS_TOKEN}@gitlab.home.arpa/devops-assignment/devops-app-gitops.git
+    - git clone "http://${GITOPS_USER}:${GITOPS_TOKEN}@gitlab.home.arpa/devops-assignment/devops-app-gitops.git"
     - cd devops-app-gitops
-    - sed -i "s|REPLACE_IMAGE|${CI_REGISTRY_IMAGE}:${IMAGE_TAG}|" base/deployment.yaml
+    - |
+      sed -i "s|image: .*|image: ${CI_REGISTRY_IMAGE}:${IMAGE_TAG}|" base/deployment.yaml
     - git config user.name "GitLab CI"
     - git config user.email "gitlab-ci@example.local"
     - git add base/deployment.yaml
-    - git commit -m "Update devops-app image to ${IMAGE_TAG}"
+    - git commit -m "Update image to ${IMAGE_TAG}"
     - git push origin main
+
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
 
