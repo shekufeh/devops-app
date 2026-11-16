@@ -50,5 +50,5 @@ update_gitops:
       else
         echo "Image is already up to date. Nothing to commit."
       fi
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
+#  rules:
+#    - if: '$CI_COMMIT_BRANCH == "main"'
