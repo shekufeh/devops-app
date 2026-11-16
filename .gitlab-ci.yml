@@ -34,9 +34,9 @@ push_image:
 
 update_gitops:
   stage: push
-  before_script:
-    - sudo apt-get update
-    - sudo apt-get install -y git
+#  before_script:
+#    - sudo apt-get update
+#   - sudo apt-get install -y git
   script:
     - git clone "http://${GITOPS_USER}:${GITOPS_TOKEN}@gitlab.home.arpa/devops-assignment/devops-app-gitops.git"
     - cd devops-app-gitops
