@@ -1,4 +1,3 @@
-
 stages:
   - test
   - build
@@ -49,4 +48,6 @@ update_gitops:
     - git push origin main
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
+
+shokoufeh@master:~/devops-assignment/devops-app$
 
