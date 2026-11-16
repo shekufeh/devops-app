@@ -2,6 +2,7 @@ stages:
   - test
   - build
   - push
+  - update
 
 variables:
   IMAGE_TAG: "$CI_COMMIT_SHA"
@@ -28,18 +29,31 @@ push_image:
     - docker push "$CI_REGISTRY_IMAGE:$IMAGE_TAG"
     - docker logout "$CI_REGISTRY"
   rules:
-    - if: '$CI_COMMIT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "main"'
 
 update_gitops:
-  stage: push
+  stage: update
   script:
-    - git clone "http://${GITOPS_USER}:${GITOPS_TOKEN}@gitlab.home.arpa/devops-assignment/devops-app-gitops.git"
-    - cd devops-app-gitops
-    - sed -i "s|^[[:space:]]*image:.*|          image: ${CI_REGISTRY_IMAGE}:${IMAGE_TAG}|" base/deployment.yaml
-    - git config user.name "GitLab CI"
-    - git config user.email "gitlab-ci@example.local"
-    - git add base/deployment.yaml
-    - git diff --cached --quiet || git commit -m "Update image to ${IMAGE_TAG}"
-    - git push origin main
+    - |
+      AUTH=$(printf '%s' "${GITOPS_USER}:${GITOPS_TOKEN}" | base64 | tr -d '\n')
+
+      git -c http.extraheader="Authorization: Basic ${AUTH}" \
+        clone http://gitlab.home.arpa/devops-assignment/devops-app-gitops.git
+
+      cd devops-app-gitops
+
+      sed -i -E "s|^([[:space:]]*)image:.*|\1image: ${CI_REGISTRY_IMAGE}:${IMAGE_TAG}|" base/deployment.yaml
+
+      git config user.name "GitLab CI"
+      git config user.email "gitlab-ci@example.local"
+
+      git add base/deployment.yaml
+
+      if ! git diff --cached --quiet; then
+        git commit -m "Update image to ${IMAGE_TAG}"
+        git -c http.extraheader="Authorization: Basic ${AUTH}" push origin main
+      else
+        echo "No GitOps changes detected."
+      fi
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
